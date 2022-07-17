@@ -5,14 +5,12 @@ const User = require("./User");
 const mongoose=require("mongoose");
 const jwt = require("jsonwebtoken");
 app.use(express.json());
-mongoose.connect("mongodb:// localhost/auth-service",{
+const db = mongoose.connect("mongodb://localhost/auth-service",{
     useNewUrlParser:true,
     useUnifiedTopology:true
-},() =>{
+}).then(async() => {
     console.log("Auth-Service DB Connected");
-});
-
-
+    
 //Register
 app.post("/auth/login", async (req, res) => {
     const { email, password } = req.body;
@@ -21,9 +19,9 @@ app.post("/auth/login", async (req, res) => {
         return res.json({ message: "User doesn't exist" });
     } else 
     {
-        // if (password !== user.password) {
-        //     return res.json({ message: "Password Incorrect" });
-        // }
+        if (password !== user.password) {
+            return res.json({ message: "Password Incorrect" });
+        }
         const payload = {
             email,
             name: user.name
@@ -42,17 +40,16 @@ app.post("/auth/register", async (req, res) => {
     } else {
         const newUser = new User({
             email,
-            name,
+            name, 
             password,
         });
         newUser.save();
         return res.json(newUser);
     }
 });
-//Login
-
 
 app.listen(PORT,()=>{
     console.log(`Auth-Service at${PORT}`);
 });
     
+})

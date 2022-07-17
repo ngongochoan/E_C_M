@@ -7,53 +7,52 @@ const amqp = require("amqplib");
 const isAuthenticated = require("../isAuthenticated");
 
 var channel, connection;
+app.use(express.json());
 
-mongoose.connect(
+ const db= mongoose.connect(
     "mongodb://localhost/order-service",
     {
         useNewUrlParser: true,
         useUnifiedTopology: true,
-    },
-    () => {
-        console.log(`Order-Service DB Connected`);
     }
-);
-// app.use(express.json());
-
-// function createOrder(products, userEmail) {
-//     let total = 0;
-//     for (let t = 0; t < products.length; ++t) {
-//         total += products[t].price;
-//     }
-//     const newOrder = new Order({
-//         products,
-//         user: userEmail,
-//         total_price: total,
-//     });
-//     newOrder.save();
-//     return newOrder;
-// }
-
-async function connect() {
-    const amqpServer = "amqp://localhost:5672";
-    connection = await amqp.connect(amqpServer);
-    channel = await connection.createChannel();
-    await channel.assertQueue("ORDER");
-}
-connect().then(() => {
-    channel.consume("ORDER", (data) => {
-        console.log("Consuming ORDER service");
-        const { products, userEmail } = JSON.parse(data.content);
-        console.log(products)
-        const newOrder = createOrder(products, userEmail);
-        channel.ack(data);
-        channel.sendToQueue(
-            "PRODUCT",
-            Buffer.from(JSON.stringify({ newOrder }))
-        );
+).then(async () => {
+    console.log(`Order-Service DB Connected`);
+    function createOrder(products, userEmail) {
+        let total = 0;
+        for (let t = 0; t < products.length; ++t) {
+            total += products[t].price;
+        }
+        const newOrder = new Order({
+            products,
+            user: userEmail,
+            total_price: total,
+        });
+        newOrder.save();
+        return newOrder;
+    }
+    
+    async function connect() {
+        const amqpServer = "amqp://localhost:5672";
+        connection = await amqp.connect(amqpServer);
+        channel = await connection.createChannel();
+        await channel.assertQueue("ORDER");
+    }
+    connect().then(() => {
+        channel.consume("ORDER", (data) => {
+            console.log("Consuming ORDER service");
+            const { products, userEmail } = JSON.parse(data.content);
+            console.log(products)
+            const newOrder = createOrder(products, userEmail);s
+            channel.ack(data);
+            channel.sendToQueue(
+                "PRODUCT",
+                Buffer.from(JSON.stringify({ newOrder }))
+            );
+        });
     });
-});
-
-app.listen(PORT, () => {
-    console.log(`Order-Service at ${PORT}`);
+    
+    app.listen(PORT, () => {
+        console.log(`Order-Service at ${PORT}`);
+    });
+    
 });
