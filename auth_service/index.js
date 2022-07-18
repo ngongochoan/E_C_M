@@ -48,6 +48,13 @@ app.post("/auth/register", async (req, res) => {
     }
 });
 
+app.get('/', async(req, res) => {
+    res.json('dmm')
+})
+
+app.get('/test', async(req, res) => {
+    res.json('dmm11')
+})
 app.listen(PORT,()=>{
     console.log(`Auth-Service at${PORT}`);
 });

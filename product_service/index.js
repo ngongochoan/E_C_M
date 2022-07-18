@@ -25,7 +25,7 @@ const db= mongoose.connect(
             await channel.assertQueue("PRODUCT");
         }
         connect();
-        
+        // Buy a new product
         app.post("/product/buy", isAuthenticated, async (req, res) => {
             const { ids } = req.body;
             const products = await Product.find({ _id: { $in: ids } });
@@ -43,7 +43,7 @@ const db= mongoose.connect(
             });
             return res.json(order);
         });
-        
+    // Create a new product    
         app.post("/product/create", isAuthenticated, async (req, res) => {
             const { name, description, price } = req.body;
             const newProduct = new Product({

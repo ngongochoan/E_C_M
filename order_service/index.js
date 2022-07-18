@@ -42,7 +42,7 @@ app.use(express.json());
             console.log("Consuming ORDER service");
             const { products, userEmail } = JSON.parse(data.content);
             console.log(products)
-            const newOrder = createOrder(products, userEmail);s
+            const newOrder = createOrder(products, userEmail);
             channel.ack(data);
             channel.sendToQueue(
                 "PRODUCT",
